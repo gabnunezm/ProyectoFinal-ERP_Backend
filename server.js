@@ -22,11 +22,13 @@ const authRouter = require('./src/routes/auth.router');
 const estudiantesRouter = require('./src/routes/estudiantes.router');
 const pagosRouter = require('./src/routes/pagos.router');
 const usuariosRouter = require('./src/routes/usuarios.router');
+const estudiantesRouter = require('./src/routes/estudiantes.router');
 
 app.use('/api/auth', authRouter);
 app.use('/api/estudiantes', estudiantesRouter);
 app.use('/api/pagos', pagosRouter);
 app.use('/api/usuarios', usuariosRouter);
+app.use('/api/estudiantes', estudiantesRouter);
 
 // middleware simple de error
 app.use((err, req, res, next) => {
