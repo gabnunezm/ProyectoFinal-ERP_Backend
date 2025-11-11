@@ -158,3 +158,8 @@ INSERT INTO cursos (codigo, nombre, descripcion, creditos) VALUES
 
 INSERT INTO periodos (nombre, fecha_inicio, fecha_fin) VALUES
 ('2025-1','2025-02-01','2025-06-30');
+
+-- Vistas
+SELECT * FROM estudiantes;
+SELECT * FROM usuarios;
+-- SELECT * FROM

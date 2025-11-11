@@ -95,13 +95,11 @@ async function actualizarUsuario(req, res, next) {
   }
 }
 
-/**
- * Cambiar contraseña
- * PATCH /api/usuarios/:id/password
- * Body: { oldPassword?, newPassword }
- * - Si es admin (o tiene permisos) se permite sin oldPassword.
- * - Si es el mismo usuario, requiere oldPassword para confirmar.
- */
+// Cambiar contraseña
+// PATCH /api/usuarios/:id/password
+// Body: { oldPassword?, newPassword }
+// - Si es admin (o tiene permisos) se permite sin oldPassword.
+// - Si es el mismo usuario, requiere oldPassword para confirmar.
 async function cambiarPassword(req, res, next) {
   try {
     const { id } = req.params;
@@ -110,17 +108,46 @@ async function cambiarPassword(req, res, next) {
     if (!newPassword) return res.status(400).json({ error: 'newPassword es requerido' });
 
     // obtener usuario con password (consulta directa)
-    const rawUser = await require('../models/usuarios.model').findByEmail ? null : null;
-    // El modelo no expone password_hash, así que hacemos consulta directa aquí:
     const db = require('../db');
     const [rows] = await db.execute('SELECT * FROM usuarios WHERE id = ?', [id]);
     const user = rows[0];
     if (!user) return res.status(404).json({ error: 'Usuario no encontrado' });
 
-    // Si el requester no es admin, debe validar oldPassword
-    const requester = req.user || {}; // Si usas auth.middleware, tendrá req.user
-    const isAdmin = requester.role_id === 1; // suponiendo role_id=1 => admin
-    const isSelf = requester.id === Number(id);
+    // requester puede venir de req.user (si tienes auth.middleware)
+    let requester = req.user || {};
+
+    // Si no hay requester.role_id, intentar decodificar token (fallback)
+    let tokenPayload = null;
+    if ((!requester.role_id && !requester.roleId && !requester.role) && req.headers && req.headers.authorization) {
+      const authHeader = String(req.headers.authorization || '');
+      if (authHeader.startsWith('Bearer ')) {
+        const token = authHeader.split(' ')[1];
+        try {
+          const jwt = require('jsonwebtoken');
+          tokenPayload = jwt.decode(token) || {};
+        } catch (e) {
+          tokenPayload = null;
+        }
+      }
+    }
+
+    // Normalizar requester fields from tokenPayload if needed
+    if (tokenPayload) {
+      // if requester doesn't have id, try to set from token
+      if (!requester.id && (tokenPayload.id || tokenPayload.userId)) {
+        requester.id = tokenPayload.id || tokenPayload.userId;
+      }
+      // map role id/name from payload if not present already
+      if (!requester.role_id && (tokenPayload.role_id || tokenPayload.roleId || tokenPayload.role)) {
+        requester.role_id = tokenPayload.role_id ?? tokenPayload.roleId ?? undefined;
+        // also keep role string if present
+        requester.role = tokenPayload.role ?? undefined;
+      }
+    }
+
+    // determine admin/self
+    const isAdmin = Number(requester.role_id) === 1 || String(requester.role) === 'admin' || String(requester.role) === '1';
+    const isSelf = Number(requester.id) === Number(id);
 
     if (!isAdmin) {
       if (!isSelf) return res.status(403).json({ error: 'No autorizado para cambiar esta contraseña' });
