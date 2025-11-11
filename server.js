@@ -22,11 +22,23 @@ const authRouter = require('./src/routes/auth.router');
 const estudiantesRouter = require('./src/routes/estudiantes.router');
 const pagosRouter = require('./src/routes/pagos.router');
 const usuariosRouter = require('./src/routes/usuarios.router');
+const estudiantesRouter = require('./src/routes/estudiantes.router');
+const calificacionesRouter = require('./src/routes/calificaciones.router');
+const inscripcionesRouter = require('./src/routes/inscripciones.router');
+const asistenciasRouter = require('./src/routes/asistencias.router');
+const reportsRouter = require('./src/routes/reports.router');
+const portalRouter = require('./src/routes/portal.router');
 
 app.use('/api/auth', authRouter);
 app.use('/api/estudiantes', estudiantesRouter);
 app.use('/api/pagos', pagosRouter);
 app.use('/api/usuarios', usuariosRouter);
+app.use('/api/estudiantes', estudiantesRouter);
+app.use('/api/calificaciones', calificacionesRouter);
+app.use('/api/inscripciones', inscripcionesRouter);
+app.use('/api/asistencias', asistenciasRouter);
+app.use('/api/reports', reportsRouter);
+app.use('/api/portal', portalRouter);
 
 // middleware simple de error
 app.use((err, req, res, next) => {
