@@ -14,7 +14,7 @@ const pool = mysql.createPool({
   host: DB_HOST || 'localhost',
   port: DB_PORT ? Number(DB_PORT) : 3306,
   user: DB_USER || 'root',
-  password: DB_PASS || '',
+  password: DB_PASS || '12345',
   database: DB_NAME || 'erp_academico',
   waitForConnections: true,
   connectionLimit: 10,

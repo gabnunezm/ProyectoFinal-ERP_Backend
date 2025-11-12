@@ -159,7 +159,63 @@ INSERT INTO cursos (codigo, nombre, descripcion, creditos) VALUES
 INSERT INTO periodos (nombre, fecha_inicio, fecha_fin) VALUES
 ('2025-1','2025-02-01','2025-06-30');
 
+
+-- ======================================
+-- Triggers para sincronizar 'estudiantes'
+-- Cuando un usuario tenga rol 'estudiante' o role_id = 3
+-- se crea/actualiza/elimina el registro correspondiente en 'estudiantes'
+-- ======================================
+
+DELIMITER $$
+
+CREATE TRIGGER trg_usuarios_after_insert
+AFTER INSERT ON usuarios
+FOR EACH ROW
+BEGIN
+  DECLARE student_role_id INT DEFAULT NULL;
+  SELECT id INTO student_role_id FROM roles WHERE name = 'estudiante' LIMIT 1;
+  IF NEW.role_id = 3 OR (student_role_id IS NOT NULL AND NEW.role_id = student_role_id) THEN
+    IF (SELECT COUNT(*) FROM estudiantes WHERE usuario_id = NEW.id) = 0 THEN
+      INSERT INTO estudiantes (usuario_id, creado_en) VALUES (NEW.id, CURRENT_TIMESTAMP);
+    END IF;
+  END IF;
+END$$
+
+CREATE TRIGGER trg_usuarios_after_update
+AFTER UPDATE ON usuarios
+FOR EACH ROW
+BEGIN
+  DECLARE student_role_id INT DEFAULT NULL;
+  SELECT id INTO student_role_id FROM roles WHERE name = 'estudiante' LIMIT 1;
+
+  -- Si ahora tiene rol de estudiante y no existía, crear
+  IF NEW.role_id = 3 OR (student_role_id IS NOT NULL AND NEW.role_id = student_role_id) THEN
+    IF (SELECT COUNT(*) FROM estudiantes WHERE usuario_id = NEW.id) = 0 THEN
+      INSERT INTO estudiantes (usuario_id, creado_en) VALUES (NEW.id, CURRENT_TIMESTAMP);
+    END IF;
+
+  -- Si dejó de ser estudiante y existe registro, eliminar
+  ELSE
+    IF (SELECT COUNT(*) FROM estudiantes WHERE usuario_id = NEW.id) > 0 THEN
+      DELETE FROM estudiantes WHERE usuario_id = NEW.id;
+    END IF;
+  END IF;
+END$$
+
+CREATE TRIGGER trg_usuarios_after_delete
+AFTER DELETE ON usuarios
+FOR EACH ROW
+BEGIN
+  DELETE FROM estudiantes WHERE usuario_id = OLD.id;
+END$$
+
+DELIMITER ;
+
+
+
+
 -- Vistas
 SELECT * FROM estudiantes;
 SELECT * FROM usuarios;
 -- SELECT * FROM
+

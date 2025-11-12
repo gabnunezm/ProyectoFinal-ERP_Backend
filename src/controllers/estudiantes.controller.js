@@ -26,6 +26,20 @@ async function obtenerEstudiante(req, res, next) {
   }
 }
 
+async function obtenerEstudiantePorUsuario(req, res, next) {
+  try {
+    const usuario_id = req.params.usuario_id;
+    if (!usuario_id) return res.status(400).json({ error: 'usuario_id es requerido' });
+
+    // El modelo ya proporciona findByUsuarioId según el controlador anterior
+    const estudiante = await estudiantesModel.findByUsuarioId(usuario_id);
+    if (!estudiante) return res.status(404).json({ error: 'Estudiante no encontrado' });
+    return res.json({ estudiante });
+  } catch (err) {
+    next(err);
+  }
+}
+
 async function actualizarEstudiante(req, res, next) {
   try {
     const { id } = req.params;
@@ -52,6 +66,7 @@ async function eliminarEstudiante(req, res, next) {
 module.exports = {
   crearEstudiante,
   obtenerEstudiante,
+  obtenerEstudiantePorUsuario,
   actualizarEstudiante,
   eliminarEstudiante
 };
