@@ -1,5 +1,16 @@
 const db = require('../db');
 
+async function listAll() {
+  const [rows] = await db.execute(
+    `SELECT e.id, e.usuario_id, e.codigo_estudiante, e.fecha_nacimiento, e.genero, e.telefono, e.direccion, e.creado_en,
+            u.nombre AS nombre_usuario, u.email, u.activo
+     FROM estudiantes e
+     JOIN usuarios u ON u.id = e.usuario_id
+     ORDER BY e.creado_en DESC`
+  );
+  return rows;
+}
+
 async function createEstudiante({ usuario_id, codigo_estudiante = null, fecha_nacimiento = null, genero = 'O', telefono = null, direccion = null }) {
   const sql = `INSERT INTO estudiantes (usuario_id, codigo_estudiante, fecha_nacimiento, genero, telefono, direccion)
                VALUES (?, ?, ?, ?, ?, ?)`;
@@ -55,6 +66,7 @@ async function deleteEstudianteSoft(id) {
 }
 
 module.exports = {
+  listAll,
   createEstudiante,
   findById,
   findByUsuarioId,

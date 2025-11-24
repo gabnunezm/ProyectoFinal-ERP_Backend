@@ -3,6 +3,9 @@ const router = Router();
 const ctrl = require('../controllers/estudiantes.controller');
 const auth = require('../middlewares/auth.middleware');
 
+// Listar todos los estudiantes
+router.get('/', /* auth, */ ctrl.listarEstudiantes);
+
 router.post('/', /* auth, */ ctrl.crearEstudiante);
 
 // Nueva ruta para obtener estudiante por usuario_id

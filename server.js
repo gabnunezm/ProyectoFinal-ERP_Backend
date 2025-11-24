@@ -17,6 +17,7 @@ app.use((req, res, next) => {
   }
   next();
 });
+
 // rutas
 const authRouter = require('./src/routes/auth.router');
 const estudiantesRouter = require('./src/routes/estudiantes.router');
@@ -27,6 +28,9 @@ const inscripcionesRouter = require('./src/routes/inscripciones.router');
 const asistenciasRouter = require('./src/routes/asistencias.router');
 const reportsRouter = require('./src/routes/reports.router');
 const portalRouter = require('./src/routes/portal.router');
+const cursosRouter = require('./src/routes/cursos.router');
+const seccionesRouter = require('./src/routes/secciones.router');
+const docentesRouter = require('./src/routes/docentes.router');
 
 app.use('/api/auth', authRouter);
 app.use('/api/estudiantes', estudiantesRouter);
@@ -37,6 +41,10 @@ app.use('/api/inscripciones', inscripcionesRouter);
 app.use('/api/asistencias', asistenciasRouter);
 app.use('/api/reports', reportsRouter);
 app.use('/api/portal', portalRouter);
+// Rutas administrativas añadidas para gestión desde el frontend
+app.use('/api/cursos', cursosRouter);
+app.use('/api/secciones', seccionesRouter);
+app.use('/api/docentes', docentesRouter);
 
 // middleware simple de error
 app.use((err, req, res, next) => {

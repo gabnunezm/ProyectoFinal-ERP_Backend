@@ -168,6 +168,7 @@ INSERT INTO periodos (nombre, fecha_inicio, fecha_fin) VALUES
 
 DELIMITER $$
 
+-- TRIGGERS PARA ESTUDIANTES
 CREATE TRIGGER trg_usuarios_after_insert
 AFTER INSERT ON usuarios
 FOR EACH ROW
@@ -187,14 +188,10 @@ FOR EACH ROW
 BEGIN
   DECLARE student_role_id INT DEFAULT NULL;
   SELECT id INTO student_role_id FROM roles WHERE name = 'estudiante' LIMIT 1;
-
-  -- Si ahora tiene rol de estudiante y no existía, crear
   IF NEW.role_id = 3 OR (student_role_id IS NOT NULL AND NEW.role_id = student_role_id) THEN
     IF (SELECT COUNT(*) FROM estudiantes WHERE usuario_id = NEW.id) = 0 THEN
       INSERT INTO estudiantes (usuario_id, creado_en) VALUES (NEW.id, CURRENT_TIMESTAMP);
     END IF;
-
-  -- Si dejó de ser estudiante y existe registro, eliminar
   ELSE
     IF (SELECT COUNT(*) FROM estudiantes WHERE usuario_id = NEW.id) > 0 THEN
       DELETE FROM estudiantes WHERE usuario_id = NEW.id;
@@ -209,13 +206,48 @@ BEGIN
   DELETE FROM estudiantes WHERE usuario_id = OLD.id;
 END$$
 
+-- TRIGGERS PARA DOCENTES
+CREATE TRIGGER trg_usuarios_docentes_after_insert
+AFTER INSERT ON usuarios
+FOR EACH ROW
+BEGIN
+  DECLARE teacher_role_id INT DEFAULT NULL;
+  SELECT id INTO teacher_role_id FROM roles WHERE name = 'docente' LIMIT 1;
+  IF NEW.role_id = 2 OR (teacher_role_id IS NOT NULL AND NEW.role_id = teacher_role_id) THEN
+    IF (SELECT COUNT(*) FROM docentes WHERE usuario_id = NEW.id) = 0 THEN
+      INSERT INTO docentes (usuario_id, creado_en) VALUES (NEW.id, CURRENT_TIMESTAMP);
+    END IF;
+  END IF;
+END$$
+
+CREATE TRIGGER trg_usuarios_docentes_after_update
+AFTER UPDATE ON usuarios
+FOR EACH ROW
+BEGIN
+  DECLARE teacher_role_id INT DEFAULT NULL;
+  SELECT id INTO teacher_role_id FROM roles WHERE name = 'docente' LIMIT 1;
+  IF NEW.role_id = 2 OR (teacher_role_id IS NOT NULL AND NEW.role_id = teacher_role_id) THEN
+    IF (SELECT COUNT(*) FROM docentes WHERE usuario_id = NEW.id) = 0 THEN
+      INSERT INTO docentes (usuario_id, creado_en) VALUES (NEW.id, CURRENT_TIMESTAMP);
+    END IF;
+  ELSE
+    IF (SELECT COUNT(*) FROM docentes WHERE usuario_id = NEW.id) > 0 THEN
+      DELETE FROM docentes WHERE usuario_id = NEW.id;
+    END IF;
+  END IF;
+END$$
+
+CREATE TRIGGER trg_usuarios_docentes_after_delete
+AFTER DELETE ON usuarios
+FOR EACH ROW
+BEGIN
+  DELETE FROM docentes WHERE usuario_id = OLD.id;
+END$$
+
 DELIMITER ;
-
-
 
 
 -- Vistas
 SELECT * FROM estudiantes;
 SELECT * FROM usuarios;
--- SELECT * FROM
-
+SELECT * FROM docentes;

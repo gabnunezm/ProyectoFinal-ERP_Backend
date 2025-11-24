@@ -1,5 +1,14 @@
 const estudiantesModel = require('../models/estudiantes.model');
 
+async function listarEstudiantes(req, res, next) {
+  try {
+    const estudiantes = await estudiantesModel.listAll();
+    return res.json({ estudiantes });
+  } catch (err) {
+    next(err);
+  }
+}
+
 async function crearEstudiante(req, res, next) {
   try {
     const { usuario_id, codigo_estudiante, fecha_nacimiento, genero, telefono, direccion } = req.body;
@@ -64,6 +73,7 @@ async function eliminarEstudiante(req, res, next) {
 }
 
 module.exports = {
+  listarEstudiantes,
   crearEstudiante,
   obtenerEstudiante,
   obtenerEstudiantePorUsuario,
