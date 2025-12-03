@@ -13,7 +13,7 @@ async function createPago(data) {
     fecha_pago = null,
     metodo_pago = null,
     referencia = null,
-    estado = 'pagado'
+    estado = 'pendiente'  // Cambiado de 'pagado' a 'pendiente' por defecto
   } = data;
 
   const sql = `INSERT INTO pagos
@@ -45,8 +45,8 @@ async function getPagosByEstudiante(estudianteId, opts = {}) {
   const limit = Number(opts.limit) || 20;
   const offset = Number(opts.offset) || 0;
   const [rows] = await db.execute(
-    `SELECT * FROM pagos WHERE estudiante_id = ? ORDER BY creado_en DESC LIMIT ? OFFSET ?`,
-    [estudianteId, limit, offset]
+    `SELECT * FROM pagos WHERE estudiante_id = ? ORDER BY creado_en DESC LIMIT ${limit} OFFSET ${offset}`,
+    [estudianteId]
   );
   return rows;
 }
@@ -124,11 +124,31 @@ async function listPagos(filters = {}) {
   return rows;
 }
 
+/**
+ * Obtiene todos los pagos con información del estudiante (para panel admin)
+ * @returns {Promise<Array>}
+ */
+async function findAllWithStudentInfo() {
+  const sql = `
+    SELECT 
+      p.*,
+      e.codigo_estudiante as estudiante_codigo,
+      u.nombre as estudiante_nombre
+    FROM pagos p
+    LEFT JOIN estudiantes e ON p.estudiante_id = e.id
+    LEFT JOIN usuarios u ON e.usuario_id = u.id
+    ORDER BY p.creado_en DESC
+  `;
+  const [rows] = await db.execute(sql);
+  return rows;
+}
+
 module.exports = {
   createPago,
   getPagoById,
   getPagosByEstudiante,
   updatePagoEstado,
   updatePago,
-  listPagos
+  listPagos,
+  findAllWithStudentInfo
 };

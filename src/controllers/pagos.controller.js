@@ -1,4 +1,3 @@
-// pagos.controller.js
 const pagosModel = require('../models/pagos.model');
 
 /**
@@ -28,7 +27,7 @@ async function crearPago(req, res, next) {
       fecha_pago: fecha_pago || null,
       metodo_pago: metodo_pago || null,
       referencia: referencia || null,
-      estado: estado || 'pagado'
+      estado: estado || 'pendiente'  // Cambiado de 'pagado' a 'pendiente'
     });
 
     return res.status(201).json({ pago });
@@ -54,6 +53,7 @@ async function obtenerPago(req, res, next) {
 /**
  * GET /api/pagos
  * Query params: estudiante_id, tipo_pago, estado, fecha_inicio, fecha_fin, limit, offset
+ * Si no hay filtros, usa findAllWithStudentInfo para obtener datos completos (panel admin)
  */
 async function listarPagos(req, res, next) {
   try {
@@ -67,7 +67,16 @@ async function listarPagos(req, res, next) {
       offset: req.query.offset
     };
 
-    const pagos = await pagosModel.listPagos(filters);
+    // Si no hay filtros específicos, usar método con info de estudiante (para panel admin)
+    const hasFilters = Object.values(filters).some(v => v != null);
+    
+    let pagos;
+    if (!hasFilters) {
+      pagos = await pagosModel.findAllWithStudentInfo();
+    } else {
+      pagos = await pagosModel.listPagos(filters);
+    }
+
     return res.json({ pagos });
   } catch (err) {
     next(err);
