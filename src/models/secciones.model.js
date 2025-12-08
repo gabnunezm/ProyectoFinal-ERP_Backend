@@ -43,4 +43,36 @@ async function createSeccion({ curso_id, nombre_seccion, docente_id = null, jorn
   return rows[0];
 }
 
-module.exports = { listSecciones, getSeccionById, listSeccionesByDocenteUsuarioId, createSeccion };
+async function updateSeccion(id, { curso_id, nombre_seccion, docente_id = null, jornada = null, horario = null }) {
+  await db.execute(
+    `UPDATE secciones 
+     SET curso_id = ?, nombre_seccion = ?, docente_id = ?, jornada = ?, horario = ?
+     WHERE id = ?`, 
+    [curso_id, nombre_seccion, docente_id, jornada, horario, id]
+  );
+  const [rows] = await db.execute('SELECT * FROM secciones WHERE id = ?', [id]);
+  return rows[0];
+}
+
+async function deleteSeccion(id) {
+  await db.execute('DELETE FROM secciones WHERE id = ?', [id]);
+}
+
+module.exports = { 
+
+  listSecciones, 
+  getSeccionById, 
+  listSeccionesByDocenteUsuarioId, 
+  createSeccion,
+  updateSeccion,
+  deleteSeccion,
+  
+  // Alias para mejor compatibilidad al llamar
+  create: createSeccion,
+  update: updateSeccion,
+  delete: deleteSeccion,
+  getAll: listSecciones,
+  getById: getSeccionById,
+  findById: getSeccionById,
+  findAll: listSecciones
+};

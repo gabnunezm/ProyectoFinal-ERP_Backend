@@ -251,3 +251,5 @@ DELIMITER ;
 SELECT * FROM estudiantes;
 SELECT * FROM usuarios;
 SELECT * FROM docentes;
+SELECT * FROM cursos;
+SELECT * FROM secciones;
