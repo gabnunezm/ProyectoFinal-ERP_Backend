@@ -49,9 +49,9 @@ async function portalEstudiante(req, res, next) {
 
       // asistencia resumen
       const [asRows] = await db.execute(
-        `SELECT estado, COUNT(*) AS cantidad FROM asistencias a
-         JOIN inscripciones i ON i.id = a.inscripcion_id
-         WHERE a.inscripcion_id = ? GROUP BY estado`, [ins.inscripcion_id]
+        `SELECT a.estado, COUNT(*) AS cantidad FROM asistencias a
+        JOIN inscripciones i ON i.id = a.inscripcion_id
+        WHERE a.inscripcion_id = ? GROUP BY a.estado`, [ins.inscripcion_id]
       );
       const resumenAsistencia = {};
       for (const r of asRows) resumenAsistencia[r.estado] = r.cantidad;
